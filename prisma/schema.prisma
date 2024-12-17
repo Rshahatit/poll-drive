@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  DRIVER
+  RIDER
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RideStatus {
+  SCHEDULED
+  PICKED_UP
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model User {
+  id               String           @id @default(cuid())
+  clerkId          String           @unique
+  email            String           @unique
+  name             String
+  phone            String?
+  type             UserType
+  emergencyContact String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  ridesAsRider     Ride[]           @relation("RiderRides")
+  ridesAsDriver    Ride[]           @relation("DriverRides")
+  driverDetails    DriverDetails?
+  notifications    Notification[]
+  preferences      UserPreferences?
+}
+
+model DriverDetails {
+  id              String              @id @default(cuid())
+  userId          String              @unique
+  user            User                @relation(fields: [userId], references: [id])
+  carModel        String?
+  licensePlate    String?
+  insuranceNumber String?
+  totalSeats      Int?
+  available       Boolean             @default(false)
+  currentLat      Float?
+  currentLng      Float?
+  availableSeats  Int?
+  averageRating   Float               @default(5)
+  verifiedAt      DateTime?
+  verification    DriverVerification?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+}
+
+model DriverVerification {
+  id               String             @id @default(cuid())
+  driverDetailsId  String             @unique
+  driverDetails    DriverDetails      @relation(fields: [driverDetailsId], references: [id])
+  status           VerificationStatus @default(PENDING)
+  idImageUrl       String?
+  driverLicenseUrl String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model Ride {
+  id                  String     @id @default(cuid())
+  riderId             String
+  rider               User       @relation("RiderRides", fields: [riderId], references: [id])
+  driverId            String
+  driver              User       @relation("DriverRides", fields: [driverId], references: [id])
+  status              RideStatus @default(SCHEDULED)
+  pickupLat           Float
+  pickupLng           Float
+  pickupAddress       String
+  pollingLocationId   String
+  driverRating        Int?
+  driverRatingComment String?
+  pickupTime          DateTime
+  completedTime       DateTime?
+  cancellationReason  String?
+  tipAmount           Float      @default(0)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserPreferences {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  emailEnabled Boolean  @default(true)
+  pushEnabled  Boolean  @default(true)
+  smsEnabled   Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

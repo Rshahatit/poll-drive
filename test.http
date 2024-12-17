@@ -1,0 +1,19 @@
+### Register a new user
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+Authorization: Bearer 1734393600-59ElLUN7wY9tBpPtOPO8YVis6Um3sE_XE7WFw-BB08E
+
+{
+  "name": "Test User",
+  "type": "RIDER",
+  "phone": "1234567890",
+  "email": "test@example.com"
+}
+
+### Get user profile
+GET http://localhost:3000/api/users/me
+Authorization: Bearer dvb_2qGTA6vlXlwr1oLK9kPZqTZjM41
+
+### Get polling locations
+GET http://localhost:3000/api/locations/polling?lat=37.7749&lng=-122.4194
+Authorization: Bearer dvb_2qGTA6vlXlwr1oLK9kPZqTZjM41
