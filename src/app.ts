@@ -14,7 +14,6 @@ import locationRoutes from "./routes/location.routes"
 import rideRoutes from "./routes/ride.routes"
 import notificationRoutes from "./routes/notification.routes"
 import riderRoutes from "./routes/rider.routes"
-import { devAuthMiddleware } from "./middleware/dev-auth"
 
 const app = express()
 
@@ -34,15 +33,8 @@ app.use(requestLogger)
 // Add error handler as the last middleware
 app.use(errorHandler)
 
-if (
-  process.env.NODE_ENV === "development" &&
-  process.env.BYPASS_AUTH === "true"
-) {
-  app.use(devAuthMiddleware)
-} else {
-  // Clerk Authentication Middleware
-  app.use(clerkMiddleware())
-}
+// Clerk Authentication Middleware
+app.use(clerkMiddleware())
 
 // Routes
 app.use("/api/auth", authRoutes)

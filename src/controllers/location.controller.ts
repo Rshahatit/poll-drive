@@ -40,7 +40,7 @@ export class LocationController {
         return
       }
 
-      const { lat, lng, radius = 5 } = validation.data
+      const { lat, lng = 5 } = validation.data
 
       try {
         // Call Google Civic Information API
