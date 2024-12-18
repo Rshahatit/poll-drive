@@ -3,7 +3,6 @@ import express from "express"
 import cors from "cors"
 import helmet from "helmet"
 import morgan from "morgan"
-import { clerkMiddleware } from "@clerk/express"
 import { errorHandler } from "./middleware/error"
 import { logger, requestLogger } from "./config/logger"
 
@@ -14,6 +13,7 @@ import locationRoutes from "./routes/location.routes"
 import rideRoutes from "./routes/ride.routes"
 import notificationRoutes from "./routes/notification.routes"
 import riderRoutes from "./routes/rider.routes"
+import { testAuthMiddleware } from "./middleware/test-auth"
 
 const app = express()
 
@@ -34,7 +34,7 @@ app.use(requestLogger)
 app.use(errorHandler)
 
 // Clerk Authentication Middleware
-app.use(clerkMiddleware())
+app.use(testAuthMiddleware)
 
 // Routes
 app.use("/api/auth", authRoutes)
@@ -43,9 +43,6 @@ app.use("/api/drivers", driverRoutes)
 app.use("/api/locations", locationRoutes)
 app.use("/api/rides", rideRoutes)
 app.use("/api/notifications", notificationRoutes)
-
-// Error handling
-app.use(errorHandler)
 
 const PORT = process.env.PORT || 3000
 

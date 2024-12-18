@@ -2,8 +2,7 @@
 import { Request, Response } from "express"
 import { PrismaClient } from "@prisma/client"
 import { z } from "zod"
-import { getAuth } from "@clerk/express"
-import { logger } from "../config/logger"
+import { TEST_USERS } from "../middleware/test-auth"
 
 const prisma = new PrismaClient()
 
@@ -34,16 +33,8 @@ export class AuthController {
         return
       }
 
-      const auth = getAuth(req)
-      logger.info("Auth", auth)
       const { name, type, phone, email } = validation.data
-      const clerkId = auth.userId ?? ""
-
-      if (!clerkId) {
-        res.status(401).json({
-          error: "Unauthorized",
-        })
-      }
+      const clerkId = TEST_USERS.RIDER.userId
 
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
@@ -54,6 +45,7 @@ export class AuthController {
         res.status(400).json({
           error: "User already registered",
         })
+        return
       }
 
       // Create new user in our database
@@ -105,16 +97,9 @@ export class AuthController {
     }
   }
 
-  static async getProfile(req: Request, res: Response): Promise<void> {
+  static async getProfile(_req: Request, res: Response): Promise<void> {
     try {
-      const auth = getAuth(req)
-      const clerkId = auth.userId ?? ""
-
-      if (!clerkId) {
-        res.status(401).json({
-          error: "Unauthorized",
-        })
-      }
+      const clerkId = TEST_USERS.RIDER.userId
 
       const user = await prisma.user.findUnique({
         where: { clerkId },
@@ -128,6 +113,7 @@ export class AuthController {
         res.status(404).json({
           error: "User not found",
         })
+        return
       }
 
       res.json({ user })
@@ -139,7 +125,7 @@ export class AuthController {
     }
   }
 
-  static async updateProfile(req: Request, res: Response) {
+  static async updateProfile(req: Request, res: Response): Promise<void> {
     try {
       const validation = updateProfileSchema.safeParse(req.body)
 
@@ -148,18 +134,11 @@ export class AuthController {
           error: "Invalid input",
           details: validation.error.errors,
         })
+        return
       }
 
-      const auth = getAuth(req)
-      const clerkId = auth.userId ?? ""
-
-      if (!clerkId) {
-        res.status(401).json({
-          error: "Unauthorized",
-        })
-      }
-
-      const { name, phone, emergencyContact } = validation.data || {}
+      const clerkId = TEST_USERS.RIDER.userId
+      const { name, phone, emergencyContact } = validation.data
 
       const updatedUser = await prisma.user.update({
         where: { clerkId },

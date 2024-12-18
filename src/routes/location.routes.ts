@@ -7,6 +7,6 @@ const router = express.Router()
 router.get("/polling", LocationController.getPollingLocations)
 
 // Get available drivers near coordinates
-router.get("/drivers/available", LocationController.getAvailableDrivers)
+// router.get("/drivers/available", LocationController.getAvailableDrivers)
 
 export default router
